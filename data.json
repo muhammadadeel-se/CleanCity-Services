@@ -1,0 +1,233 @@
+{
+  "faqs": [
+    {
+      "id": 1,
+      "question": "What items are accepted in the residential blue recycling bin?",
+      "answer": "Clean paper, cardboard, rigid plastic bottles (#1 and #2), glass jars, and clean aluminum or tin cans are accepted. Rinse empty.",
+      "category": "Recycling Guidelines",
+      "source_url": "https://www.cleancityservices.gov/recycling-faq"
+    },
+    {
+      "id": 2,
+      "question": "Can greasy pizza boxes be placed in recycling?",
+      "answer": "No. Food-contaminated cardboard cannot be recycled. Place soiled cardboard into the organic compost bin or general trash.",
+      "category": "Recycling Guidelines",
+      "source_url": "https://www.cleancityservices.gov/recycling-faq"
+    },
+    {
+      "id": 3,
+      "question": "How do I safely dispose of household hazardous waste like paint or batteries?",
+      "answer": "Lithium batteries, paints, solvents, and pesticides must not go in curb bins. Submit a Hazardous Pickup Request or visit the Central Depot.",
+      "category": "Hazardous Waste",
+      "source_url": "https://www.cleancityservices.gov/hazardous-disposal"
+    },
+    {
+      "id": 4,
+      "question": "What time should waste bins be set out on collection day?",
+      "answer": "Bins must be placed at the curb by 7:00 AM on scheduled collection day or after 7:00 PM the evening prior.",
+      "category": "Collection Rules",
+      "source_url": "https://www.cleancityservices.gov/collection-schedules"
+    },
+    {
+      "id": 5,
+      "question": "What should I do if my waste collection was missed?",
+      "answer": "Ensure bins were set out on time. If missed by the crew, submit a Missed Pickup Request online within 24 hours.",
+      "category": "Customer Support",
+      "source_url": "https://www.cleancityservices.gov/special-requests"
+    },
+    {
+      "id": 6,
+      "question": "Are plastic grocery bags accepted in curbside recycling?",
+      "answer": "No. Plastic bags wrap around sorting equipment. Return plastic bags to participating grocery store drop-off bins.",
+      "category": "Recycling Guidelines",
+      "source_url": "https://www.cleancityservices.gov/recycling-faq"
+    },
+    {
+      "id": 7,
+      "question": "How can I replace a damaged or stolen waste bin?",
+      "answer": "Submit a Bin Replacement Request online. Replacement carts are delivered within 3 business days.",
+      "category": "Bin Management",
+      "source_url": "https://www.cleancityservices.gov/special-requests"
+    },
+    {
+      "id": 8,
+      "question": "What are the guidelines for yard waste and garden trimmings?",
+      "answer": "Place in brown paper yard bags or green organic bins. Branches must be bundled under 4 feet in length and 2 inches in diameter.",
+      "category": "Yard & Organics",
+      "source_url": "https://www.cleancityservices.gov/collection-schedules"
+    },
+    {
+      "id": 9,
+      "question": "Can styrofoam or expanded polystyrene be recycled curbside?",
+      "answer": "No. Foam containers are not recyclable curbside. Place in general waste or drop off at designated municipal depots.",
+      "category": "Recycling Guidelines",
+      "source_url": "https://www.cleancityservices.gov/recycling-faq"
+    },
+    {
+      "id": 10,
+      "question": "How do I dispose of old electronics and appliances (E-waste)?",
+      "answer": "E-waste contains heavy metals and cannot go in general trash. Schedule a Special E-Waste Pickup or visit the municipal depot.",
+      "category": "E-Waste",
+      "source_url": "https://www.cleancityservices.gov/hazardous-disposal"
+    },
+    {
+      "id": 11,
+      "question": "What materials belong in the green organic compost bin?",
+      "answer": "Food scraps, vegetable peels, coffee grounds, paper towels, yard waste, and certified compostable packaging belong in green bins.",
+      "category": "Yard & Organics",
+      "source_url": "https://www.cleancityservices.gov/recycling-faq"
+    },
+    {
+      "id": 12,
+      "question": "How does holiday waste collection work during statutory holidays?",
+      "answer": "Collection schedules shift forward by one day following official holidays (e.g., Monday holiday shifts Monday pickup to Tuesday).",
+      "category": "Collection Rules",
+      "source_url": "https://www.cleancityservices.gov/collection-schedules"
+    },
+    {
+      "id": 13,
+      "question": "Is medical waste or household sharps allowed in residential trash?",
+      "answer": "Sharps must never be placed in general trash. Place in FDA-approved sharps containers and return to pharmacy drop-off sites.",
+      "category": "Hazardous Waste",
+      "source_url": "https://www.cleancityservices.gov/hazardous-disposal"
+    },
+    {
+      "id": 14,
+      "question": "How heavy can residential waste and recycling bins be?",
+      "answer": "Standard rolling carts have a maximum weight limit of 200 lbs. Overfilled carts will not be serviced by automated arms.",
+      "category": "Collection Rules",
+      "source_url": "https://www.cleancityservices.gov/collection-schedules"
+    },
+    {
+      "id": 15,
+      "question": "Where can I drop off extra waste that exceeds regular bin capacity?",
+      "answer": "Purchase extra waste tags at municipal centers or drop excess solid waste directly at the City Transfer Station.",
+      "category": "Customer Support",
+      "source_url": "https://www.cleancityservices.gov/collection-schedules"
+    }
+  ],
+  "schedules": [
+    {
+      "id": 1,
+      "zone": "Zone A - Downtown North",
+      "waste_type": "General Waste",
+      "collection_day": "Monday",
+      "frequency": "Weekly",
+      "notes": "Place cart at curb before 7:00 AM."
+    },
+    {
+      "id": 2,
+      "zone": "Zone A - Downtown North",
+      "waste_type": "Recycling (Blue Bin)",
+      "collection_day": "Tuesday",
+      "frequency": "Bi-weekly",
+      "notes": "Odd calendar weeks only."
+    },
+    {
+      "id": 3,
+      "zone": "Zone B - East Residential",
+      "waste_type": "General Waste",
+      "collection_day": "Tuesday",
+      "frequency": "Weekly",
+      "notes": "Place cart at curb before 7:00 AM."
+    },
+    {
+      "id": 4,
+      "zone": "Zone B - East Residential",
+      "waste_type": "Recycling (Blue Bin)",
+      "collection_day": "Wednesday",
+      "frequency": "Bi-weekly",
+      "notes": "Even calendar weeks only."
+    },
+    {
+      "id": 5,
+      "zone": "Zone C - West Suburbs",
+      "waste_type": "General Waste",
+      "collection_day": "Wednesday",
+      "frequency": "Weekly",
+      "notes": "Place cart at curb before 7:00 AM."
+    },
+    {
+      "id": 6,
+      "zone": "Zone C - West Suburbs",
+      "waste_type": "Organic Waste (Green Bin)",
+      "collection_day": "Thursday",
+      "frequency": "Weekly",
+      "notes": "Accepts food scraps and yard trimmings."
+    },
+    {
+      "id": 7,
+      "zone": "Zone D - South Industrial",
+      "waste_type": "General Waste",
+      "collection_day": "Thursday",
+      "frequency": "Weekly",
+      "notes": "Heavy commercial vehicles operate early morning."
+    },
+    {
+      "id": 8,
+      "zone": "Zone D - South Industrial",
+      "waste_type": "Recycling (Blue Bin)",
+      "collection_day": "Friday",
+      "frequency": "Bi-weekly",
+      "notes": "Odd calendar weeks only."
+    },
+    {
+      "id": 9,
+      "zone": "Zone E - North Heights",
+      "waste_type": "Organic Waste (Green Bin)",
+      "collection_day": "Friday",
+      "frequency": "Weekly",
+      "notes": "Bundled branches under 4 feet accepted."
+    },
+    {
+      "id": 10,
+      "zone": "All City Zones",
+      "waste_type": "Hazardous & E-Waste Drop-off",
+      "collection_day": "Saturday",
+      "frequency": "Monthly (1st Sat)",
+      "notes": "Central Depot open 8:00 AM - 2:00 PM."
+    }
+  ],
+  "requests": [
+    {
+      "id": 1,
+      "request_type": "Bulk Item Pickup Request",
+      "description": "Schedule removal of oversized items including furniture and non-freon appliances.",
+      "required_info": "Item list, dimensions, preferred pickup date, address",
+      "processing_days": 3,
+      "fee": "Free (2 pickups/year, $25 extra)"
+    },
+    {
+      "id": 2,
+      "request_type": "Bin Replacement or Repair Request",
+      "description": "Request repair or replacement for damaged or stolen wheelie carts.",
+      "required_info": "Bin serial number, bin size, issue description, address",
+      "processing_days": 2,
+      "fee": "Free for normal wear or stolen cart"
+    },
+    {
+      "id": 3,
+      "request_type": "Household Hazardous Waste Pickup",
+      "description": "Doorstep pickup for motor oil, batteries, liquid paints, and chemicals.",
+      "required_info": "Chemical types, approximate volume, secure location",
+      "processing_days": 5,
+      "fee": "Free residential service"
+    },
+    {
+      "id": 4,
+      "request_type": "Event & Extra Bin Temporary Rental",
+      "description": "Short-term rental of additional waste and recycling carts for events.",
+      "required_info": "Event date, number of carts needed, delivery address",
+      "processing_days": 4,
+      "fee": "$15 per cart/day"
+    },
+    {
+      "id": 5,
+      "request_type": "Missed Collection Escalation Form",
+      "description": "Report missed scheduled trash, recycling, or compost pickup.",
+      "required_info": "Collection date, waste type missed, placement timestamp",
+      "processing_days": 1,
+      "fee": "Free service"
+    }
+  ]
+}

@@ -12,7 +12,6 @@ DB_FILE = "cleancity.db"
 INDEX_FILE = "faiss_index.bin"
 MODEL_NAME = "all-MiniLM-L6-v2"
 
-# Global model and index variables (loaded once at startup)
 embed_model = None
 faiss_index = None
 
@@ -39,7 +38,6 @@ def keyword_search(query_text, limit=10):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Clean and tokenize search query (words > 2 chars)
     words = [
         re.sub(r"\W+", "", w).lower()
         for w in query_text.split()
@@ -49,7 +47,7 @@ def keyword_search(query_text, limit=10):
         conn.close()
         return {}
 
-    results = {}  # Key: (table_name, pk) -> dict
+    results = {}
 
     # 1. Search FAQ table
     for word in words:
@@ -136,7 +134,6 @@ def keyword_search(query_text, limit=10):
 
     conn.close()
 
-    # Normalize keyword score between 0.0 and 1.0 based on matches / total words
     total_words = len(words)
     for key, item in results.items():
         item["kw_score"] = min(1.0, item["kw_matches"] / total_words)
@@ -145,19 +142,20 @@ def keyword_search(query_text, limit=10):
 
 
 def vector_search(query_text, k=10):
-    """Query FAISS index for top-k similar dense vectors."""
+    """Query FAISS index and compute cosine similarity vector scores."""
     load_resources()
 
-    query_vec = embed_model.encode([query_text]).astype("float32")
-    distances, indices = faiss_index.search(query_vec, k)
+    query_vec = embed_model.encode(query_text).astype("float32")
+    distances, indices = faiss_index.search(np.array([query_vec]), k)
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     results = {}
-    for dist, idx in zip(distances[0], indices[0]):
+    for idx in indices[0]:
         if idx == -1:
             continue
+
         cursor.execute(
             "SELECT table_name, pk FROM faiss_meta WHERE idx = ?", (int(idx),)
         )
@@ -168,10 +166,20 @@ def vector_search(query_text, k=10):
         table_name, pk = row["table_name"], row["pk"]
         key = (table_name, pk)
 
-        # Convert L2 distance to normalized vector similarity score (range 0 to 1)
-        sim_score = float(1.0 / (1.0 + float(dist)))
+        # Retrieve indexed document vector & calculate Cosine Similarity
+        doc_vec = faiss_index.reconstruct(int(idx))
+        norm_q = np.linalg.norm(query_vec)
+        norm_d = np.linalg.norm(doc_vec)
 
-        # Fetch full text details from underlying table
+        if norm_q > 0 and norm_d > 0:
+            cos_sim = np.dot(query_vec, doc_vec) / (norm_q * norm_d)
+        else:
+            cos_sim = 0.0
+
+        # Scale cosine similarity from range [-1, 1] to [0, 1]
+        vec_score = float((cos_sim + 1.0) / 2.0)
+
+        # Hydrate record fields
         if table_name == "faq":
             cursor.execute(
                 "SELECT question, answer, category, source_url FROM faq WHERE"
@@ -214,7 +222,7 @@ def vector_search(query_text, k=10):
             "pk": pk,
             "text": text,
             "source": source,
-            "vector_score": sim_score,
+            "vector_score": vec_score,
         }
 
     conn.close()
@@ -222,11 +230,10 @@ def vector_search(query_text, k=10):
 
 
 def hybrid_search(query_text, alpha=0.6, top_k=5):
-    """Combine SQLite keyword search and FAISS vector search using weighted scoring."""
+    """Combine keyword & vector search results with cosine scoring and tie-breaking."""
     kw_results = keyword_search(query_text, limit=10)
     vec_results = vector_search(query_text, k=10)
 
-    # Merge keys from both result sets
     all_keys = set(kw_results.keys()).union(set(vec_results.keys()))
     combined = []
 
@@ -240,16 +247,29 @@ def hybrid_search(query_text, alpha=0.6, top_k=5):
         kw_score = kw_item.get("kw_score", 0.0)
         vec_score = vec_item.get("vector_score", 0.0)
 
-        # Weighted hybrid score calculation
-        hybrid_score = round((alpha * vec_score) + ((1.0 - alpha) * kw_score), 4)
-
-        combined.append(
-            {"text": text, "source": source, "score": hybrid_score}
+        hybrid_score = round(
+            (alpha * vec_score) + ((1.0 - alpha) * kw_score), 4
         )
 
-    # Sort descending by hybrid score
-    combined.sort(key=lambda x: x["score"], reverse=True)
-    return combined[:top_k]
+        combined.append(
+            {
+                "text": text,
+                "source": source,
+                "score": hybrid_score,
+                "vec_score": round(vec_score, 4),
+            }
+        )
+
+    # Sort primarily by hybrid_score, secondarily by vec_score (tie-breaker)
+    combined.sort(key=lambda x: (x["score"], x["vec_score"]), reverse=True)
+
+    # Remove internal vec_score field before returning public results
+    output_results = [
+        {"text": r["text"], "source": r["source"], "score": r["score"]}
+        for r in combined[:top_k]
+    ]
+
+    return output_results
 
 
 @app.route("/search", methods=["POST"])

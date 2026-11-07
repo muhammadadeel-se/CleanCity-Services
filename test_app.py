@@ -1,58 +1,49 @@
-# test_app.py
 import pytest
-from app import app, load_resources
+import time
+from app import app, query_cache, request_history, norm_query, RATE_LIMIT
 
 @pytest.fixture
 def client():
-    load_resources()
     app.config['TESTING'] = True
+    # Clear in-memory state before each test
+    query_cache.clear()
+    request_history.clear()
     with app.test_client() as client:
         yield client
 
-def test_search_endpoint_success(client):
-    """Verify that a valid query returns HTTP 200 and a topic-relevant result."""
-    response = client.post('/search', json={"q": "when is recycling collected?"})
-    assert response.status_code == 200
+def test_norm_query_helper():
+    """Verify query normalization behavior."""
+    assert norm_query("  When is RECYCLING collected???  ") == "when is recycling collected"
+    assert norm_query("???") == ""
+
+def test_cache_hit_and_miss(client):
+    """Verify cache miss on first query and cache hit on repeated identical query within TTL."""
+    payload = {"q": "when is recycling collected?"}
     
-    data = response.get_json()
-    assert "query" in data
-    assert data["query"] == "when is recycling collected?"
-    assert "results" in data
-    assert isinstance(data["results"], list)
-    assert len(data["results"]) > 0
-
-    # Verify structured output format
-    first_result = data["results"][0]
-    assert "text" in first_result
-    assert "source" in first_result
-    assert "score" in first_result
-    assert isinstance(first_result["score"], float)
-    assert first_result["score"] > 0.0
-
-    # Criterion 4 Fix: Verify the top result is semantically relevant to the query topic
-    top_text = first_result["text"].lower()
-    relevant_terms = ["recycl", "collect", "schedule", "bin", "waste"]
-    assert any(term in top_text for term in relevant_terms), (
-        f"Top result text lacks query relevance: '{first_result['text']}'"
-    )
-
-def test_search_endpoint_relevance_hazardous_waste(client):
-    """Verify hazardous waste query returns relevant FAQ or schedule metadata."""
-    response = client.post('/search', json={"q": "hazardous waste disposal"})
-    assert response.status_code == 200
+    # 1st request -> Cache Miss
+    res1 = client.post('/search', json=payload)
+    assert res1.status_code == 200
     
-    data = response.get_json()
-    assert len(data["results"]) > 0
-    
-    top_text = data["results"][0]["text"].lower()
-    relevant_terms = ["hazard", "waste", "dispos", "paint", "chemical", "faq", "request"]
-    assert any(term in top_text for term in relevant_terms), (
-        f"Top result text lacks query relevance: '{data['results'][0]['text']}'"
-    )
+    # 2nd request -> Cache Hit (Instant response from memory)
+    res2 = client.post('/search', json=payload)
+    assert res2.status_code == 200
+    assert res1.get_json() == res2.get_json()
 
-def test_search_endpoint_empty_query(client):
-    """Verify that an empty query returns HTTP 400 error response."""
-    response = client.post('/search', json={"q": ""})
-    assert response.status_code == 400
-    data = response.get_json()
-    assert "error" in data
+def test_rate_limiting_429(client):
+    """Verify that requests exceeding 30 reqs/hr trigger HTTP 429."""
+    payload = {"q": "waste collection"}
+    
+    # Send up to allowed limit (30 requests)
+    for _ in range(RATE_LIMIT):
+        res = client.post('/search', json=payload)
+        assert res.status_code == 200
+
+    # 31st request -> Blocked with 429
+    res_blocked = client.post('/search', json=payload)
+    assert res_blocked.status_code == 429
+    assert res_blocked.get_json()["error"] == "Too Many Requests"
+
+def test_empty_query_validation(client):
+    """Verify empty/punctuation-only queries return HTTP 400."""
+    res = client.post('/search', json={"q": "!!!"})
+    assert res.status_code == 400

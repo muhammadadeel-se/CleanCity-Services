@@ -246,6 +246,13 @@ def search_endpoint():
 
     return jsonify(response_payload), 200
 
+# Startup par model aur index pre-load karein taake HTTP request time-out na ho
+try:
+    load_resources()
+    logger.info("Model and FAISS index loaded successfully on startup.")
+except Exception as e:
+    logger.error(f"Error loading resources on startup: {e}")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

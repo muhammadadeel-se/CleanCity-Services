@@ -1,33 +1,38 @@
+import logging
 import os
 import re
+import sqlite3
 import string
 import time
-import logging
-import sqlite3
-import numpy as np
-import faiss
-from sentence_transformers import SentenceTransformer
+from collections import OrderedDict
 from threading import Lock
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
 from flask import Flask, jsonify, request
 
-# Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("CleanCityAPI")
 
 app = Flask(__name__)
 
 # --- CONFIGURATION ---
-CACHE_TTL = 600       # 10 minutes
-CACHE_MAX_SIZE = 500  
-RATE_LIMIT = 30       # 30 reqs/hr
-WINDOW_SIZE = 3600    # 1 hour
+CACHE_TTL = 600       # 10 minutes (seconds)
+CACHE_MAX_SIZE = 500  # Max cache size
+RATE_LIMIT = 30       # Max requests per hour
+WINDOW_SIZE = 3600    # 1 hour window (seconds)
 
-query_cache = {}
+# True LRU Cache using OrderedDict
+query_cache = OrderedDict()
 cache_lock = Lock()
+
+# Rate limit store
 request_history = {}
 rate_limit_lock = Lock()
 
-# Global variables for models/indexes
 embed_model = None
 faiss_index = None
 
@@ -57,6 +62,7 @@ def get_cached_response(norm_q: str):
         if norm_q in query_cache:
             data, timestamp = query_cache[norm_q]
             if now - timestamp < CACHE_TTL:
+                query_cache.move_to_end(norm_q)  # Refresh LRU position on hit
                 logger.info(f"CACHE HIT: '{norm_q}'")
                 return data
             else:
@@ -67,19 +73,25 @@ def get_cached_response(norm_q: str):
 def set_cached_response(norm_q: str, data: dict):
     now = time.time()
     with cache_lock:
-        if len(query_cache) >= CACHE_MAX_SIZE:
-            oldest_key = min(query_cache.keys(), key=lambda k: query_cache[k][1])
-            del query_cache[oldest_key]
+        if norm_q in query_cache:
+            query_cache.move_to_end(norm_q)
         query_cache[norm_q] = (data, now)
+        if len(query_cache) > CACHE_MAX_SIZE:
+            query_cache.popitem(last=False)  # Evict least recently used item
 
 def is_rate_limited(client_ip: str) -> bool:
     now = time.time()
     with rate_limit_lock:
         if client_ip not in request_history:
             request_history[client_ip] = []
-        request_history[client_ip] = [t for t in request_history[client_ip] if now - t < WINDOW_SIZE]
+        request_history[client_ip] = [
+            t for t in request_history[client_ip] if now - t < WINDOW_SIZE
+        ]
         if len(request_history[client_ip]) >= RATE_LIMIT:
-            logger.warning(f"RATE LIMIT EXCEEDED: IP {client_ip} blocked.")
+            logger.warning(
+                f"RATE LIMIT EXCEEDED: IP {client_ip} blocked "
+                f"({len(request_history[client_ip])}/{RATE_LIMIT} reqs/hr)."
+            )
             return True
         request_history[client_ip].append(now)
         return False
@@ -207,7 +219,7 @@ def hybrid_search(query_text, alpha=0.6, top_k=5):
 @app.before_request
 def enforce_rate_limit():
     if request.path == "/search":
-        client_ip = request.remote_addr or "127.0.0.1"
+        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
         if is_rate_limited(client_ip):
             return jsonify({
                 "error": "Too Many Requests",
@@ -235,4 +247,5 @@ def search_endpoint():
     return jsonify(response_payload), 200
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

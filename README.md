@@ -11,4 +11,4 @@ Hybrid keyword and vector search microservice built with Flask, SQLite, FAISS (`
 
 ### Direct Terminal Verification (PowerShell)
 ```powershell
-Invoke-RestMethod -Uri "[https://noble-charisma-production-1dad.up.railway.app/search](https://noble-charisma-production-1dad.up.railway.app/search)" -Method Post -ContentType "application/json" -Body '{"q":"when is recycling collected?"}'
+Invoke-RestMethod -Uri "https://noble-charisma-production-1dad.up.railway.app/search" -Method Post -ContentType "application/json" -Body '{"q":"when is recycling collected?"}'

@@ -6,8 +6,8 @@ Hybrid keyword and vector search microservice built with Flask, SQLite, FAISS (`
 
 ## 1. Live Deployment & Reachability Evidence
 
-* **Live Base URL:** https://noble-charisma-production-1dad.up.railway.app
-* **Live Search Endpoint (POST):** https://noble-charisma-production-1dad.up.railway.app/search
+* Base URL: https://noble-charisma-production-1dad.up.railway.app
+* Search Endpoint (POST): https://noble-charisma-production-1dad.up.railway.app/search
 
 ### Direct Terminal Verification (PowerShell)
 ```powershell
